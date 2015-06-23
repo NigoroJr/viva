@@ -124,6 +124,7 @@ class Viva
 
   # Prompts for a number. Returns nil if quit or invalid answer
   def prompt(items)
+    return items unless items.is_a?(Enumerable)
     return items.first if items.size < 2
 
     print_items(items)
