@@ -57,7 +57,7 @@ end
 # Adds interactive functionalities to Viva class
 class Viva
   def interactive_add
-    what = input('Series (s) or track (t)', nil)
+    what = input('Series (s), track (t), or quit (q)', nil)
     return if what.nil?
 
     case what[0]
@@ -66,6 +66,8 @@ class Viva
       db.add_tracks(track_prop, series)
     when 's'
       db.add_series(get_series_prop)
+    else
+      exit
     end
   end
 
@@ -85,12 +87,14 @@ class Viva
 
   # Returns a list of tracks that match the query
   def interactive_search
-    what = input('Series (s) or track (t)', nil)
+    what = input('Series (s), track (t), or quit (q)', nil)
     case what[0]
     when 't'
       interactive_search_track
     when 's'
       interactive_search_series
+    else
+      exit
     end
   end
 
