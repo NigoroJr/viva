@@ -22,13 +22,16 @@ class Viva
       end
 
       def to_s(detailed: false)
-        puts jpn unless jpn.nil?
-        puts eng unless eng.nil?
+        str = ''
+        str += jpn unless jpn.nil?
+        str += eng unless eng.nil?
 
         if detailed
-          puts raw
-          puts series_number unless series_number.nil?
+          str += raw
+          str += series_number unless series_number.nil?
         end
+
+        str
       end
     end
 
