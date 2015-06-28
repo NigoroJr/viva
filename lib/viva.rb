@@ -122,27 +122,16 @@ class Viva
     end
   end
 
-  def Viva.print_track_info(track, detail = false)
+  # Given one Track, this method prints out that track's information.
+  # ActiveRecord::Relation can be given (result from Track.where), but
+  # it will print out the first Track element.
+  def self.print_track_info(track, detailed = false)
     return if track.nil?
     return unless track.is_a?(ActiveRecord::Relation) \
       || track.is_a?(Viva::Database::Track)
     track = track.first if track.is_a?(ActiveRecord::Relation)
 
-    title = track[:title] || track[:default_title]
-    print "#{title}"
-    unless track.series.nil?
-      series = track.series[:jpn] || track.series[:eng] \
-        || track.series[:raw]
-      print " from #{series}"
-    end
-    puts
-
-    if detail
-      puts track[:url]
-      printf "%s ", track[:artist] unless track[:artist].nil?
-      print track[:album] unless track[:album].nil?
-      puts
-    end
+    puts track.to_s(detailed: detailed)
   end
 
   # Given any kind of data from the database, this method returns one entry.
