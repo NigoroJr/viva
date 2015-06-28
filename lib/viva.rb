@@ -32,7 +32,7 @@ class Viva
     return if track.nil?
 
     if track.is_a?(Hash)
-      track = db.search(track)
+      track = db.search_strict(track)
     end
 
     player = Viva::Player.new(track)
