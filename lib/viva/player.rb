@@ -66,6 +66,11 @@ class Viva
         # When getting message from child that mpg123 has terminated
         break if output == 'q'
 
+        # Print if there's any error
+        if output.start_with?('@E')
+          STDERR.puts output
+        end
+
         # Show current time
         if output.start_with?('@F')
           # Forth field is the current time
