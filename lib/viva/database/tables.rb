@@ -64,6 +64,7 @@ class Viva
           additional = []
           additional << format('Artist: %s', artist) unless artist.nil?
           additional << format('Album: %s', album) unless album.nil?
+          additional << format('URL: %s', url)
           str = format "%s\n%s", str, additional.join(' ')
         end
 
