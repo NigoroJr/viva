@@ -42,6 +42,23 @@ class Viva
         column = title || default_title
         column.display_width
       end
+
+      def to_s(detailed: false)
+        str = title || default_title
+        if series
+          name = series.jpn || series.eng || series.raw
+          str = format '%s from %s', str, name
+        end
+
+        if detailed
+          additional = []
+          additional << format('Artist: %s', artist) unless artist.nil?
+          additional << format('Album: %s', album) unless album.nil?
+          str = format "%s\n%s", str, additional.join(' ')
+        end
+
+        str
+      end
     end
 
     # Initialize tables

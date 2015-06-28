@@ -24,45 +24,23 @@ class Viva
     @db = Viva::Database.new(db_file)
   end
 
-  # Given one or an array of Track's, plays one of them.
-  # Prompts the user for one track if an array is given
-  # TODO: Play all of them?
-  def play(tracks, save_file_name = nil)
-    track = prompt(tracks)
+  # Given a Hash, Track, or an ActiveRecord::Relation object,
+  # this method plays the corresponding file by passing it to the player.
+  # TODO: multiple tracks
+  def play(tracks_info, save_file_name = nil)
+    track = Viva.singularlize(tracks_info, prompt_if_multi: true)
     return if track.nil?
+
+    if track.is_a?(Hash)
+      track = db.search(track)
+    end
 
     player = Viva::Player.new(track)
     player.play
     player.save(save_file_name) unless save_file_name.nil?
   end
 
-  # Searches and plays a track
-  def search_and_play(term, save_file_name = nil)
-    case term
-    when String
-      tracks = @db.search_tracks(term)
-    when Viva::Database::Track
-      tracks = term
-    end
-
-    if tracks.empty?
-      puts "No track matches '#{term}'"
-      return
-    end
-
-    play(tracks, save_file_name)
-  end
-
-  def search_series_and_play(term, save_file_name = nil)
-    series = @db.search_series(term)
-
-    selected = prompt(series)
-    return if selected.nil?
-
-    tracks = Viva::Database::Track.where(series_id: selected[:id])
-    play(tracks, save_file_name)
-  end
-
+  # TODO: modulize into multiple methods
   def scrape(threads: 1, rescrape: false)
     Viva::Database::Track.where(scraped: true).delete_all if rescrape
 
@@ -124,7 +102,7 @@ class Viva
 
   # Prompts for a number. Returns nil if quit or invalid answer
   def prompt(items)
-    return items unless items.is_a?(Enumerable)
+    items = [items].flatten unless items.is_a?(Enumerable)
     return items.first if items.size < 2
 
     print_items(items)
@@ -141,6 +119,46 @@ class Viva
       nil
     when input.int? && valid_range.include?(input.to_i)
       items[input.to_i]
+    end
+  end
+
+  def Viva.print_track_info(track, detail = false)
+    return if track.nil?
+    return unless track.is_a?(ActiveRecord::Relation) \
+      || track.is_a?(Viva::Database::Track)
+    track = track.first if track.is_a?(ActiveRecord::Relation)
+
+    title = track[:title] || track[:default_title]
+    print "#{title}"
+    unless track.series.nil?
+      series = track.series[:jpn] || track.series[:eng] \
+        || track.series[:raw]
+      print " from #{series}"
+    end
+    puts
+
+    if detail
+      puts track[:url]
+      printf "%s ", track[:artist] unless track[:artist].nil?
+      print track[:album] unless track[:album].nil?
+      puts
+    end
+  end
+
+  # Given any kind of data from the database, this method returns one entry.
+  # Normally, this method is used so that there is no need to worry about
+  # doing Model.where(foo: bar).first or checking whether the result is empty.
+  # When prompt_if_multi is true, this method will call Viva::prompt to ask
+  # the user for one choice.
+  def Viva.singularlize(data, prompt_if_multi: false, unique: false)
+    return nil if data.nil?
+
+    case data
+    when ActiveRecord::Relation || Enumerable
+      fail "Multiple candidates: #{data}" if unique && data.size > 1
+      prompt_if_multi ? prompt(data) : data.first
+    else
+      data
     end
   end
 end
