@@ -1,3 +1,5 @@
+require 'viva/database'
+
 require 'childprocess'
 require 'io/console'
 
@@ -9,6 +11,8 @@ class Viva
     PLAYER_OPTIONS = ['-R']
     FINISHED = 0
 
+    # Creates a new Player object for the given
+    # Track or URL if a String is given.
     def initialize(param)
       case param
       when Viva::Database::Track
@@ -17,10 +21,14 @@ class Viva
       when String
         @url = param
       else
-        fail
+        fail "Invalid argument of class #{param.class} given"
       end
     end
 
+    # Plays the initialized Track or URL unless a new URL is explicitly
+    # specified. The parameter is used when saving a file and using that
+    # path as a new location
+    # TODO: attr_writer :url
     def play(url: nil)
       unless File.executable?(`which #{PLAYER}`.chomp!)
         fail "#{PLAYER} cannot be run"
@@ -29,7 +37,7 @@ class Viva
       # Save current tty
       stty_state = `stty -g`
 
-      print_info
+      Viva.print_track_info(@track)
 
       r, w = IO.pipe
       @process = ChildProcess.build(PLAYER, *PLAYER_OPTIONS)
@@ -102,19 +110,6 @@ class Viva
     end
 
     private
-
-    def print_info
-      return if !defined?(@track) || @track.nil?
-
-      title = @track[:title] || @track[:default_title]
-      print "#{title}"
-      unless @track.series.nil?
-        series = @track.series[:jpn] || @track.series[:eng] \
-                 || @track.series[:raw]
-        print " from #{series}"
-      end
-      puts
-    end
 
     # Sends the command to the child process (mpg123)
     def send_cmd(cmd)

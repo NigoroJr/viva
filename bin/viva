@@ -6,9 +6,10 @@ require 'slop'
 trap(2) { exit 1 }
 
 opts = Slop.parse do |o|
-  o.bool '--add', 'Add new tracks using interactive menu'
-  o.bool '--edit', 'Edit tracks using interactive menu'
-  o.bool '--count', 'Count number of series and tracks in database'
+  o.bool '--add', 'Add new tracks using the interactive menu'
+  o.bool '--edit', 'Edit tracks using the interactive menu'
+  o.bool '--delete', 'Delete tracks using the interactive menu'
+  o.bool '--count', 'Count number of series and tracks in the database'
   o.bool '--search', 'Search for tracks'
   o.bool '--show', 'Show track info'
   o.string '--db', 'Specify databes te use'
@@ -20,14 +21,19 @@ opts = Slop.parse do |o|
   o.bool '--scrape', 'Scrape website'
   o.bool '--rescrape', 'Clear scraped data and scrape again'
 
+  o.bool '-v', '--version', 'Show version'
   o.bool '-h', '--help', 'Show help'
 end
 
 if opts.help?
   puts opts
   exit
+elsif opts.version?
+  puts Viva::VERSION
+  exit
 end
 
+# Adds a method to check if string is an integer-representation
 class String
   def int?
     to_i.to_s == self
@@ -41,36 +47,99 @@ def input(mes, default = :none, &validator)
   print mes
   print format(default_fmt, default) unless default == :none || default.nil?
   print ': '
-  input = STDIN.gets.chomp
+  input = STDIN.gets.chomp.strip
   input = default if input.empty? && default != :none
   return input unless block_given?
 
   validator.call(input) ? input : default
 end
 
-def add_to_database(v)
-  what = input('Series (s) or track (t)', nil)
-  exit 1 if what.nil?
+# Adds interactive functionalities to Viva class
+class Viva
+  def interactive_add
+    what = input('Series (s), track (t), or quit (q)', nil)
+    return if what.nil?
 
-  case what[0]
-  when 't'
-    title = input('Track title')
-    url = input('URL (or absolute file path', nil)
-    exit 1 if url.nil?
-    series = input('Series to relate', nil)
-    if series.nil?
-      raw = nil
+    case what[0]
+    when 't'
+      (track_prop, series) = get_track_prop
+      db.add_tracks(track_prop, series)
+    when 's'
+      db.add_series(get_series_prop)
     else
-      raw = v.db.search_series(series.split(' ')).first.raw
+      exit
     end
-    track_prop = {
-      title: title,
-      default_title: title,
-      url: url
-    }
-    v.db.add_track(track_prop, raw)
-    puts 'Added!'
-  when 's'
+  end
+
+  def interactive_edit
+    what = interactive_search
+    return if what.nil?
+
+    to_edit = prompt(what)
+    case to_edit
+    when Viva::Database::Track
+      (track_prop, series) = get_track_prop
+      db.update_track(to_edit, track_prop, series)
+    when Viva::Database::Series
+      db.update_series(to_edit, get_series_prop)
+    end
+  end
+
+  # Returns a list of tracks that match the query
+  def interactive_search
+    what = input('Series (s), track (t), or quit (q)', nil)
+    case what[0]
+    when 't'
+      interactive_search_track
+    when 's'
+      interactive_search_series
+    else
+      exit
+    end
+  end
+
+  def interactive_search_series
+    series = input('Series name', nil)
+    return if series.nil?
+    res = db.search_series(series.split(' '))
+    res.empty? ? nil : res
+  end
+
+  def interactive_search_track
+    title = input('Title')
+    series = input('Series', nil)
+
+    return if title.empty? && series.nil?
+
+    items = db.search_series(series.split(' ')) unless series.nil?
+    # items is nil if series.nil?, hence will search all tracks
+    res =db.search_tracks(title.split(' '), items)
+    res.empty? ? nil : res
+  end
+
+  private
+
+  def get_track_prop
+    title = input('Track title', nil)
+    url = input('URL (or absolute file path', nil)
+    series = input('Series to associate', nil)
+    unless series.nil?
+      candidate_series = prompt(db.search_series(series.split(' ')))
+      if candidate_series.nil?
+        puts 'Could not find that series. Adding.'
+        series = db.add_series(get_series_prop)
+      else
+        series = candidate_series
+      end
+    end
+    track_prop = {}
+    track_prop[:title] = track_prop[:default_title] = title unless title.nil?
+    track_prop[:url] = url unless url.nil?
+
+    [track_prop, series]
+  end
+
+  def get_series_prop
     jpn = input('Japanese name', nil)
     eng = input('English name', nil)
     exit 1 if jpn.nil? && eng.nil?
@@ -78,27 +147,8 @@ def add_to_database(v)
     series_prop[:jpn] = jpn unless jpn.nil?
     series_prop[:eng] = eng unless eng.nil?
     series_prop[:raw] = jpn || eng
-    v.db.add_series(series_prop)
-    puts 'Added'
-  end
-end
 
-def interactive_mode(v, action)
-  case action
-  when :add
-    add_to_database(v)
-  when :edit
-    abort 'Sorry! Unimplemented!'
-  when :search
-    title = input('Title')
-    series = input('Series', nil)
-
-    return if title.empty? && series.nil?
-
-    items = v.db.search_series(series.split(' ')) unless series.nil?
-    items = v.db.search_tracks(title.split(' '), nil, items)
-
-    v.print_items(items)
+    series_prop
   end
 end
 
@@ -117,27 +167,25 @@ when opts.scrape? || opts.rescrape?
     input.int? && input.to_i > 0
   end
   v.scrape(threads: threads.to_i, rescrape: opts.rescrape?)
-when opts.add? || opts.edit? || (opts.search? && args.empty?)
-  action = case
-           when opts.add?
-             :add
-           when opts.edit?
-             :edit
-           when opts.search?
-             :search
-           end
-  interactive_mode(v, action)
+when opts.add?
+  v.interactive_add
+when opts.edit?
+  v.interactive_edit
+when opts.search? && opts[:series].nil? && opts[:track].nil?
+  to_show = v.prompt(v.interactive_search)
+  exit if to_show.nil? || to_show.empty?
+  puts to_show.to_s(detailed: true)
   exit
 else
   case
-  when opts[:series]
-    tracks = if opts[:track].nil?
-               series_candidates = v.db.search_series(opts[:series])
-               selected = v.prompt(series_candidates)
-               Viva::Database::Track.where(series_id: selected[:id])
-             else
-               v.db.search_tracks(opts[:track], opts[:series])
-             end
+  when !opts[:series].nil?
+    if opts[:track].nil?
+      selected = v.prompt(v.db.search_series(opts[:series]))
+      exit if selected.nil?
+      tracks = selected.tracks
+    else
+      tracks = v.db.search_tracks(opts[:track], opts[:series])
+    end
   when opts[:track]
     tracks = v.db.search_tracks(opts[:track])
   else
@@ -149,8 +197,8 @@ else
   to_play = v.prompt(tracks)
   exit if to_play.nil?
 
-  if opts[:show]
-    # TODO: show
+  if opts[:show] || opts[:search]
+    puts to_play.to_s(detailed: true)
     exit
   elsif !opts[:save].nil? && opts[:play].nil?
     v.save(opts[:save])

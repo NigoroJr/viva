@@ -6,7 +6,10 @@ require 'nokogiri'
 
 class Viva
   module Translator
-    ACCEPTED = ['(アニメ)', '(テレビアニメ)', '(漫画)', '(anime)', '(manga)', '(visual novel)']
+    ACCEPTED = [
+      '(アニメ)', '(テレビアニメ)', '(漫画)',
+      '(anime)', '(manga)', '(visual novel)'
+    ]
     REJECTED = ['系アニメ']
 
     # Queries Wikipedia to find the related wikipedia page title

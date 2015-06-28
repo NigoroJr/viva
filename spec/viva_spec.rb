@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'spec_helper'
 
 describe Viva do
@@ -62,26 +63,8 @@ describe Viva do
     v.db.add_track(tracks[2], series[4][:raw])
   end
 
-  describe '#search_and_play' do
-    it 'should play rising hope' do
-      allow(ARGF).to receive(:gets) { '0' }
-
-      expect{ v.search_and_play('rising hope') }.not_to raise_error
-    end
-
-    it 'should play resuscitated hope -tv size-' do
-      allow(ARGF).to receive(:gets) { "\n" }
-
-      expect do
-        v.search_and_play('resuscitated hope -tv size-')
-      end.not_to raise_error
-    end
-
-    it 'should play arigato... (off vocal)' do
-      allow(ARGF).to receive(:gets) { '3' }
-
-      expect{ v.search_series_and_play('gosick') }.not_to raise_error
-    end
+  describe 'do something' do
+    # TODO
   end
 
   after do
