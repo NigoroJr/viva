@@ -172,7 +172,10 @@ when opts.add?
 when opts.edit?
   v.interactive_edit
 when opts.search? && opts[:series].nil? && opts[:track].nil?
-  v.interactive_search
+  to_show = v.prompt(v.interactive_search)
+  exit if to_show.nil? || to_show.empty?
+  puts to_show.to_s(detailed: true)
+  exit
 else
   case
   when !opts[:series].nil?

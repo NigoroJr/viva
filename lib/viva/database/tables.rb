@@ -20,6 +20,16 @@ class Viva
         column = jpn || eng || raw
         column.display_width
       end
+
+      def to_s(detailed: false)
+        puts jpn unless jpn.nil?
+        puts eng unless eng.nil?
+
+        if detailed
+          puts raw
+          puts series_number unless series_number.nil?
+        end
+      end
     end
 
     # Track
