@@ -67,9 +67,7 @@ class Viva
         break if output == 'q'
 
         # Print if there's any error
-        if output.start_with?('@E')
-          STDERR.puts output
-        end
+        STDERR.puts output if output.start_with?('@E')
 
         # Show current time
         if output.start_with?('@F')

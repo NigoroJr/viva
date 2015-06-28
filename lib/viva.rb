@@ -31,9 +31,7 @@ class Viva
     track = Viva.singularlize(tracks_info, prompt_if_multi: true)
     return if track.nil?
 
-    if track.is_a?(Hash)
-      track = db.search_strict(track)
-    end
+    track = db.search_strict(track) if track.is_a?(Hash)
 
     player = Viva::Player.new(track)
     player.play

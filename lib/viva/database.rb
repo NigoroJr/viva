@@ -249,7 +249,7 @@ class Viva
     # Narrow down the current_matches with the given condition
     # This method returns current_matches if conditions[key] is nil
     def narrow(current_matches, column_name, conditions, key = nil)
-      key = key || column_name.to_sym
+      key ||= column_name.to_sym
       return current_matches if conditions.nil? || conditions[key].nil?
 
       terms = [conditions[key]].flatten
