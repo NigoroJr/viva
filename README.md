@@ -22,6 +22,7 @@ $ viva --help
 * Use Google search API to get accurate titles and possibly track names
 * zsh completion
 * Add docs?
+* Messages such as 'No matching result' etc.
 
 ## License
 MIT License
