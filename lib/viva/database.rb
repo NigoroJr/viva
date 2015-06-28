@@ -251,14 +251,26 @@ class Viva
     def narrow(current_matches, column_name, conditions, key = nil)
       key = key || column_name.to_sym
       return current_matches if conditions.nil? || conditions[key].nil?
-      case current_matches
-      when ActiveRecord::Relation
-        current_matches.where(like(column_name), escape_like(conditions[key]))
-      when Enumerable
-        current_matches.flatten.select { |data| data[key] == conditions[key] }
-      else
-        current_matches
+
+      terms = [conditions[key]].flatten
+      res = current_matches
+
+      terms.each do |term|
+        case current_matches
+        when ActiveRecord::Relation
+          res = current_matches.where(like(column_name), escape_like(term))
+        when Enumerable
+          res = current_matches.flatten.select { |data| data[key].match(term) }
+        else
+          return current_matches
+        end
+
+        return res if res.empty?
+
+        current_matches = res
       end
+
+      res
     end
   end
 end

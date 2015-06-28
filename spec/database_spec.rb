@@ -328,6 +328,14 @@ describe Viva::Database do
             results = db.search_tracks_strict(conditions)
             expect(results.first.artist).to eq 'LiSA'
           end
+
+          context 'with multiple terms' do
+            it do
+              conditions = {default_title: ['hope', 'rising']}
+              results = db.search_tracks_strict(conditions)
+              expect(results.first.artist).to eq 'LiSA'
+            end
+          end
         end
 
         context 'with two conditions' do
@@ -336,6 +344,16 @@ describe Viva::Database do
             results = db.search_tracks_strict(conditions)
             expected_title = 'resuscitated hope -tv size-'
             expect(results.first.default_title).to eq expected_title
+          end
+        end
+
+        context 'when Enumerable' do
+          it do
+            conditions = {default_title: 'hope', url: '164'}
+            base = tracks
+            results = db.search_tracks_strict(conditions, base)
+            expected_title = 'resuscitated hope -tv size-'
+            expect(results.first[:default_title]).to eq expected_title
           end
         end
       end
