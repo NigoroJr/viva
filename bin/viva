@@ -176,6 +176,15 @@ when opts.search? && opts[:series].nil? && opts[:track].nil?
   exit if to_show.nil? || to_show.empty?
   puts to_show.to_s(detailed: true)
   exit
+when opts.delete?
+  to_delete = v.prompt(v.interactive_search)
+  confirm = input('Really delete? (y/N)', 'n')
+  case to_delete
+  when Viva::Database::Track
+    to_delete.destroy if confirm == 'y'
+  when Viva::Database::Series
+    to_delete.destroy if confirm == 'y'
+  end
 else
   case
   when !opts[:series].nil?

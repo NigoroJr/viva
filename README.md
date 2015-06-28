@@ -19,7 +19,6 @@ $ viva --help
 ```
 
 ## TODO
-* `--delete`
 * Use Google search API to get accurate titles and possibly track names
 * zsh completion
 * Add docs?
