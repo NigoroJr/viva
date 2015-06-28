@@ -139,7 +139,7 @@ class Viva
   # doing Model.where(foo: bar).first or checking whether the result is empty.
   # When prompt_if_multi is true, this method will call Viva::prompt to ask
   # the user for one choice.
-  def Viva.singularlize(data, prompt_if_multi: false, unique: false)
+  def self.singularlize(data, prompt_if_multi: false, unique: false)
     return nil if data.nil?
 
     case data

@@ -133,18 +133,18 @@ class Viva
     def search_strict(conditions)
       matches = []
 
-      if !conditions[:series].nil?
+      unless conditions[:series].nil?
         if conditions[:series].is_a?(Hash)
           matched_series = search_series_strict(conditions[:series])
         else
           matched_series = search_series(conditions[:series])
         end
 
-        series_ids = matched_series.map { |s| s.id }
+        series_ids = matched_series.map(&:id)
         matches = Track.where(series_id: series_ids)
       end
 
-      if !conditions[:track].nil?
+      unless conditions[:track].nil?
         if conditions[:track].is_a?(Hash)
           matches = search_tracks_strict(conditions[:track], matches)
         else

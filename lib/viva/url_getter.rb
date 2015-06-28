@@ -56,11 +56,12 @@ class Viva
         # Series
         series = doc.xpath(base_xpath + "/tr[#{r}]/td[3]/a[1]/span").text
 
+        # track is something like 'kawaru mirai - (open)' so
+        # strip off the ' - (open)' part
+        default_title = track.safe.downcase.sub(/\.?\s+-\s*\([^)]*\)/, '')
         results << {
           series_number: number,
-          # track is something like 'kawaru mirai - (open)' so
-          # strip off the ' - (open)' part
-          default_title: track.safe.downcase.sub(/\.?\s+-\s*\([^)]*\)/, '').strip,
+          default_title: default_title.strip,
           series: series.safe.downcase.strip
         }
       end

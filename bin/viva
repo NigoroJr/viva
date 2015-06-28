@@ -28,6 +28,7 @@ if opts.help?
   exit
 end
 
+# Adds a method to check if string is an integer-representation
 class String
   def int?
     to_i.to_s == self
