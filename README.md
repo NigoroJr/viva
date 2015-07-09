@@ -23,6 +23,7 @@ $ viva --help
 * zsh completion
 * Add docs?
 * Messages such as 'No matching result' etc.
+* playlists
 
 ## License
 MIT License
