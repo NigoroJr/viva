@@ -57,6 +57,8 @@ class Viva
 
       pool.process results, raw_name do |results, raw_name|
         (to_use_jpn, to_use_eng) = Viva::Translator.guess_titles(raw_name)
+        to_use_jpn = raw_name if to_use_jpn.nil?
+        to_use_eng = raw_name if to_use_eng.nil?
         printf "%s\r%s\r", ' ' * 80, (to_use_jpn || to_use_eng || raw_name)
 
         results[raw_name][:series] = {
