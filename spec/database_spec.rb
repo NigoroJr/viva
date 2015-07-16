@@ -381,7 +381,7 @@ describe Viva::Database do
         str = track.first.to_s(detailed: true)
         expected = <<EOF
 Rising Hope from 魔法科高校の劣等生
-Artist: LiSA
+Artist: LiSA URL: http://www.musicaanime.org/aannmm11/519/imagen001.mp3
 EOF
         expect(str).to eq expected.strip
       end
