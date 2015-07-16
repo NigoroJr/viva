@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'spec_helper'
 
 describe Viva::Translator::Wikipedia do
@@ -44,6 +45,15 @@ describe Viva::Translator::Wikipedia do
       expect(Viva::Translator::Wikipedia.jpn_to_eng_title(
         '化物語'
       )).to eq nil
+    end
+  end
+
+  describe '#get_title' do
+    let(:url) { 'https://ja.wikipedia.org/wiki/%E3%82%B3%E3%83%BC%E3%83%89%E3%82%AE%E3%82%A2%E3%82%B9_%E5%8F%8D%E9%80%86%E3%81%AE%E3%83%AB%E3%83%AB%E3%83%BC%E3%82%B7%E3%83%A5' }
+    let(:title) { 'コードギアス 反逆のルルーシュ' }
+
+    it 'gets the title of the article' do
+      expect(Viva::Translator::Wikipedia.get_title(url)).to eq title
     end
   end
 end

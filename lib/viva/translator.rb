@@ -55,6 +55,11 @@ class Viva
         nil
       end
 
+      def get_title(url)
+        doc = Nokogiri::HTML.parse(open(url))
+        doc.xpath('//*[@id="firstHeading"]').text.strip
+      end
+
       private
 
       module_function
@@ -74,8 +79,7 @@ class Viva
         return nil if doc.xpath(path).empty?
         equivalent_url = File.join('https:', doc.xpath(path).attr('href'))
 
-        doc = Nokogiri::HTML.parse(open(equivalent_url))
-        doc.xpath('//*[@id="firstHeading"]').text.strip
+        get_title(equivalent_url)
       end
     end
 
