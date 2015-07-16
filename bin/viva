@@ -168,7 +168,7 @@ when opts.count?
   exit
 when opts.scrape? || opts.rescrape?
   threads = input('Number of threads', 1) do |input|
-    input.int? && input.to_i > 0
+    input.is_a?(Integer) || (input.int? && input.to_i > 0)
   end
   v.scrape(threads: threads.to_i, rescrape: opts.rescrape?)
 when opts.add?
