@@ -76,6 +76,8 @@ class Viva
     return if what.nil?
 
     to_edit = prompt(what)
+    puts "Editing #{to_edit.to_s}"
+
     case to_edit
     when Viva::Database::Track
       (track_prop, series) = get_track_prop
@@ -131,6 +133,8 @@ class Viva
       else
         series = candidate_series
       end
+
+      puts "Series: #{series.to_s}"
     end
     track_prop = {}
     track_prop[:title] = track_prop[:default_title] = title unless title.nil?
