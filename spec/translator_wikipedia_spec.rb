@@ -56,4 +56,27 @@ describe Viva::Translator::Wikipedia do
       expect(Viva::Translator::Wikipedia.get_title(url)).to eq title
     end
   end
+
+  describe '#google_search_wikipedia' do
+    it 'finds the correct Wikipedia page' do
+      expect(Viva::Translator::Wikipedia.google_search_wikipedia(
+              'bakemonogatari', 'ja')).to eq 'https://ja.wikipedia.org/wiki/%E5%8C%96%E7%89%A9%E8%AA%9E'
+    end
+
+    it 'searches for bogus keywords' do
+      expect(Viva::Translator::Wikipedia.google_search_wikipedia(
+              'hocsknotehrcahsrcsarcahosrcuh')).to eq nil
+    end
+  end
+
+  describe '#guess_title' do
+    let (:correct) { ['魔法科高校の劣等生', 'The Irregular at Magic High School'] }
+    context 'use Google Search API for both languages' do
+      it 'guesses the title from key words' do
+        expect(Viva::Translator.guess_titles(
+                'mahouka koukou no rettousei',
+                {jpn: :google, eng: :google})).to eq correct
+      end
+    end
+  end
 end

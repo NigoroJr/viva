@@ -3,6 +3,7 @@ require 'json'
 require 'uri'
 require 'open-uri'
 require 'nokogiri'
+require 'google-search'
 
 class Viva
   module Translator
@@ -55,6 +56,16 @@ class Viva
         nil
       end
 
+      def google_search_wikipedia(term, language = 'ja')
+        s = Google::Search::Web.new
+        term = term.join(' ') if term.is_a?(Enumerable)
+        s.query = "site:#{language}.wikipedia.org " + term
+        results = s.get_hash['responseData']['results']
+        return nil if results.nil? || results.empty?
+
+        results.first['unescapedUrl']
+      end
+
       def get_title(url)
         doc = Nokogiri::HTML.parse(open(url))
         doc.xpath('//*[@id="firstHeading"]').text.strip
@@ -81,29 +92,41 @@ class Viva
 
         get_title(equivalent_url)
       end
+
+      def search_wikipedia_mutual_check(raw)
+        tokenized = raw.gsub('-', ' ')
+        eng_title = Wikipedia.eng_title(tokenized)
+        jpn_title = Wikipedia.jpn_title(tokenized)
+        eng_trans = Wikipedia.jpn_to_eng_title(jpn_title)
+        jpn_trans = Wikipedia.eng_to_jpn_title(eng_title)
+
+        # Ignore 'List of' something
+        eng_title = nil if !eng_title.nil? && eng_title.start_with?('List of')
+        eng_trans = nil if !eng_trans.nil? && eng_trans.start_with?('List of')
+
+        # Use translated title for Japanese
+        # (since there's less "noise" in English Wikipedia)
+        guess_jpn = choose(jpn_title, jpn_trans, jpn_trans)
+        # Use API result for English since raw name is in English
+        guess_eng = choose(eng_title, eng_trans, eng_title)
+        [guess_jpn, guess_eng]
+      end
+
     end
 
     module_function
 
     # Guesses the Japanese and English titles from the raw name
     # Returns [Japanese title, English title]
-    def guess_titles(raw)
-      tokenized = raw.gsub('-', ' ')
-      eng_title = Wikipedia.eng_title(tokenized)
-      jpn_title = Wikipedia.jpn_title(tokenized)
-      eng_trans = Wikipedia.jpn_to_eng_title(jpn_title)
-      jpn_trans = Wikipedia.eng_to_jpn_title(eng_title)
-
-      # Ignore 'List of' something
-      eng_title = nil if !eng_title.nil? && eng_title.start_with?('List of')
-      eng_trans = nil if !eng_trans.nil? && eng_trans.start_with?('List of')
-
-      # Use translated title for Japanese
-      # (since there's less "noise" in English Wikipedia)
-      guess_jpn = choose(jpn_title, jpn_trans, jpn_trans)
-      # Use API result for English since raw name is in English
-      guess_eng = choose(eng_title, eng_trans, eng_title)
-      [guess_jpn, guess_eng]
+    def guess_titles(raw, methods = {jpn: :google, eng: :google})
+      case methods
+      when {jpn: :wikipedia, eng: :wikipedia}
+        search_wikipedia_mutual_check(raw)
+      else
+        jpn_url = search(raw, 'ja', methods[:jpn])
+        eng_url = search(raw, 'en', methods[:eng])
+        [Wikipedia.get_title(jpn_url), Wikipedia.get_title(eng_url)]
+      end
     end
 
     private
@@ -139,6 +162,20 @@ class Viva
         other = one == prioritize ? two : one
         puts "    #{prioritize} (#{other})" if Viva::DEBUG
         prioritize
+      end
+    end
+
+    def search(raw, language, method)
+      case method
+      when :google
+        Wikipedia.google_search_wikipedia(raw, language.to_s)
+      when :wikipedia
+        case language
+        when 'ja'
+          Wikipedia.jpn_title(raw)
+        when 'en'
+          Wikipedia.eng_title(raw)
+        end
       end
     end
   end

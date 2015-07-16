@@ -40,4 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'thread'
   spec.add_runtime_dependency 'slop'
   spec.add_runtime_dependency 'ruby-progressbar'
+  spec.add_runtime_dependency 'google-search'
 end
