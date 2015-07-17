@@ -28,7 +28,7 @@ class Viva
   # this method plays the corresponding file by passing it to the player.
   # TODO: multiple tracks
   def play(tracks_info, save_file_name = nil)
-    track = Viva.singularlize(tracks_info, prompt_if_multi: true)
+    track = Viva.singularize(tracks_info, prompt_if_multi: true)
     return if track.nil?
 
     track = db.search_strict(track) if track.is_a?(Hash)
@@ -89,7 +89,7 @@ class Viva
     results.each do |raw_name, properties|
       # Make sure not to create new entry of an already existing series
       series = Viva::Database::Series.where(raw: raw_name)
-      series = Viva.singularlize(series, unique:true)
+      series = Viva.singularize(series, unique:true)
       if series.nil?
         @db.add_series(properties[:series])
       else
@@ -146,7 +146,7 @@ class Viva
   # doing Model.where(foo: bar).first or checking whether the result is empty.
   # When prompt_if_multi is true, this method will call Viva::prompt to ask
   # the user for one choice.
-  def self.singularlize(data, prompt_if_multi: false, unique: false)
+  def self.singularize(data, prompt_if_multi: false, unique: false)
     return nil if data.nil?
 
     case data

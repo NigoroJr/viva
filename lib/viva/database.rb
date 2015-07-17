@@ -40,7 +40,7 @@ class Viva
       return if series.is_a?(Hash) && series.all? { |_k, v| v.nil? }
 
       if series.is_a?(Hash)
-        series = Viva.singularlize(search_series(series), unique: true)
+        series = Viva.singularize(search_series(series), unique: true)
       end
       fail "Associated series is #{series.class}" \
         "when Series instance expected"  unless series.is_a?(Series)
@@ -61,7 +61,7 @@ class Viva
       when Viva::Database::Series
         current = old
       when Hash
-        current = Viva.singularlize(search_series(old), unique: true)
+        current = Viva.singularize(search_series(old), unique: true)
       else
         fail "Invalid class #{old.class} given to update"
       end
@@ -77,7 +77,7 @@ class Viva
       when Viva::Database::Track
         current = old
       when Hash
-        current = Viva.singularlize(search_tracks(old), unique: true)
+        current = Viva.singularize(search_tracks(old), unique: true)
       else
         fail "Invalid class #{track.class} given to update"
       end
@@ -88,7 +88,7 @@ class Viva
       return if series.is_a?(Hash) && series.all? { |_k, v| v.nil? }
 
       if series.is_a?(Hash)
-        series = Viva.singularlize(search_series(series), unique: true)
+        series = Viva.singularize(search_series(series), unique: true)
       end
       fail "#{series.class} when Series expected"  unless series.is_a?(Series)
 
