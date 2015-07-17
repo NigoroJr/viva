@@ -67,8 +67,11 @@ class Viva
       end
 
       def get_title(url)
+        return nil if url.nil?
         doc = Nokogiri::HTML.parse(open(url))
-        doc.xpath('//*[@id="firstHeading"]').text.strip
+        title =doc.xpath('//*[@id="firstHeading"]').text
+        return nil if title.nil?
+        title.strip
       end
 
       private
