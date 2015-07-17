@@ -122,9 +122,11 @@ class Viva
     # Guesses the Japanese and English titles from the raw name
     # Returns [Japanese title, English title]
     def guess_titles(raw, methods = {jpn: :google, eng: :google})
+      tokenized = raw.gsub('-', ' ')
+
       case methods
       when {jpn: :wikipedia, eng: :wikipedia}
-        search_wikipedia_mutual_check(raw)
+        search_wikipedia_mutual_check(tokenized)
       else
         jpn_url = search(raw, 'ja', methods[:jpn])
         eng_url = search(raw, 'en', methods[:eng])
