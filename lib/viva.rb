@@ -144,7 +144,7 @@ class Viva
 
     case data
     when ActiveRecord::Relation || Enumerable
-      fail "Multiple candidates: #{data}" if unique && data.size > 1
+      fail "Multiple candidates: #{data.to_s}" if unique && data.size > 1
       prompt_if_multi ? prompt(data) : data.first
     else
       data

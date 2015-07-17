@@ -23,12 +23,13 @@ class Viva
 
       def to_s(detailed: false)
         str = ''
-        str += jpn unless jpn.nil?
-        str += eng unless eng.nil?
+        str += "Japanes: #{jpn}\n" unless jpn.nil?
+        str += "English: #{eng}\n" unless eng.nil?
 
         if detailed
-          str += raw
-          str += series_number unless series_number.nil?
+          str += "Raw: #{raw}"
+          str += " (Series ##{series_number})" unless series_number.nil?
+          str += "\n"
         end
 
         str

@@ -42,7 +42,8 @@ class Viva
       if series.is_a?(Hash)
         series = Viva.singularlize(search_series(series), unique: true)
       end
-      fail "#{series.class} when Series expected"  unless series.is_a?(Series)
+      fail "Associated series is #{series.class}" \
+        "when Series instance expected"  unless series.is_a?(Series)
       # Save everything in one transaction
       Track.transaction do
         created = [created] unless created.is_a?(Enumerable)
@@ -229,9 +230,9 @@ class Viva
     # Fails when `properties' is not a Hash or an Array of Hash
     def type_check(properties, key, name = nil)
       unless properties.is_a?(Hash) || \
-             properties.is_a?(Array) && properties.first.is_a?(Hash)
+             (properties.is_a?(Array) && properties.first.is_a?(Hash))
         what = name || key.to_s.capitalize
-        fail "#{what} is #{properties.class} not a Hash nor an Array of Hash"
+        fail "#{what} is #{properties.class} neither a Hash nor an Array of Hash"
       end
 
       true
