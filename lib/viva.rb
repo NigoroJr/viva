@@ -87,8 +87,15 @@ class Viva
     fmt = '%a %E %c/%C %J%% |%b>%i|'
     progress = ProgressBar.create(format: fmt, total: results.size)
     results.each do |raw_name, properties|
-      @db.add_series(properties[:series])
-      @db.add_track(properties[:tracks], raw_name)
+      # Make sure not to create new entry of an already existing series
+      series = Viva::Database::Series.where(raw: raw_name)
+      series = Viva.singularlize(series, unique:true)
+      if series.nil?
+        @db.add_series(properties[:series])
+      else
+        @db.update_series(series, properties[:series])
+      end
+      @db.add_tracks(properties[:tracks], {raw: raw_name})
       progress.increment
     end
   end
