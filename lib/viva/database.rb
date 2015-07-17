@@ -62,7 +62,7 @@ class Viva
       when Hash
         current = Viva.singularlize(search_series(old), unique: true)
       else
-        fail "Invalid class #{series.class} given to update"
+        fail "Invalid class #{old.class} given to update"
       end
       current.update(new)
       current.save
