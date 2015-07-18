@@ -110,11 +110,11 @@ class Viva
       series = Viva::Database::Series.where(raw: raw_name)
       series = Viva.singularize(series, unique: true)
       if series.nil?
-        @db.add_series(properties[:series])
+        series = @db.add_series(properties[:series])
       else
         @db.update_series(series, properties[:series])
       end
-      @db.add_tracks(properties[:tracks], {raw: raw_name})
+      @db.add_tracks(properties[:tracks], series)
       progress.increment
     end
   end
