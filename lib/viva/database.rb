@@ -232,6 +232,7 @@ class Viva
     # Checks for the parameter's data type.
     # Fails when `properties' is not a Hash or an Array of Hash
     def type_check(properties, key, name = nil)
+      return true if properties.is_a?(Array) && properties.empty?
       unless properties.is_a?(Hash) || \
              (properties.is_a?(Array) && properties.first.is_a?(Hash))
         what = name || key.to_s.capitalize
