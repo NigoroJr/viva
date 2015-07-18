@@ -11,7 +11,11 @@ class Viva
       '(アニメ)', '(テレビアニメ)', '(漫画)',
       '(anime)', '(manga)', '(visual novel)'
     ]
-    REJECTED = ['系アニメ']
+    REJECTED = [
+      '系アニメ', 'File:', 'ノート', 'User:',
+      'Wikipedia:諸言語版の秀逸な一覧/英語版',
+      '制限指定のアニメ一覧'
+    ]
 
     # Queries Wikipedia to find the related wikipedia page title
     module Wikipedia
