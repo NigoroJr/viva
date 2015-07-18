@@ -56,11 +56,15 @@ class Viva
         nil
       end
 
-      def google_search_wikipedia(term, language = 'ja')
+      def google_search_wikipedia(raw, language = 'ja')
+        term = raw.gsub('-', ' ')
         s = Google::Search::Web.new
         term = term.join(' ') if term.is_a?(Enumerable)
-        s.query = "site:#{language}.wikipedia.org " + term
-        results = s.get_hash['responseData']['results']
+        s.query = "site:#{language}.wikipedia.org #{term}"
+        results = s.get_hash['responseData']['results'].select do |r|
+          REJECTED.none? { |t| r['title'].start_with?(t) } &&
+            !r['content'].start_with?('ファイル:')
+        end
         return nil if results.nil? || results.empty?
 
         results.first['unescapedUrl']
