@@ -56,10 +56,29 @@ class Viva
       results[raw_name][:tracks] = []
 
       pool.process results, raw_name do |results, raw_name|
-        (to_use_jpn, to_use_eng) = Viva::Translator.guess_titles(raw_name)
-        to_use_jpn = raw_name if to_use_jpn.nil?
-        to_use_eng = raw_name if to_use_eng.nil?
-        printf "%s\r%s\r", ' ' * 80, (to_use_jpn || to_use_eng || raw_name)
+        begin
+          (to_use_jpn, to_use_eng) = Viva::Translator.guess_titles(raw_name)
+          # Fall back to Wikipedia search API
+          if to_use_jpn.nil?
+            if to_use_eng.nil?
+              to_use_jpn = Viva::Translator::Wikipedia.jpn_title(raw_name)
+            else
+              to_use_jpn = Viva::Translator::Wikipedia.eng_to_jpn_title(to_use_eng)
+            end
+          end
+          if to_use_eng.nil?
+            to_use_eng = Viva::Translator::Wikipedia.eng_title(raw_name)
+          end
+          printf "%s\r%s\r", ' ' * 80, (to_use_jpn || to_use_eng || raw_name)
+        rescue => e
+          if Viva::DEBUG
+            puts raw_name
+            puts e
+            puts e.backtrace
+          end
+
+          to_use_eng = to_use_jpn = raw_name
+        end
 
         results[raw_name][:series] = {
           jpn: to_use_jpn,
