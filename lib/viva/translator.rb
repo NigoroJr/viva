@@ -79,7 +79,8 @@ class Viva
         doc = Nokogiri::HTML.parse(open(url))
         title =doc.xpath('//*[@id="firstHeading"]').text
         return nil if title.nil?
-        title.strip
+
+        title.strip.sub(/\s*\(.*?\)$/, '')
       end
 
       private
