@@ -108,7 +108,7 @@ class Viva
     results.each do |raw_name, properties|
       # Make sure not to create new entry of an already existing series
       series = Viva::Database::Series.where(raw: raw_name)
-      series = Viva.singularize(series, unique:true)
+      series = Viva.singularize(series, unique: true)
       if series.nil?
         @db.add_series(properties[:series])
       else
@@ -170,7 +170,14 @@ class Viva
 
     case data
     when ActiveRecord::Relation || Enumerable
-      fail "Multiple candidates: #{data.to_s}" if unique && data.size > 1
+      if unique && data.size > 1
+        puts
+        puts 'Following candidates matched:'
+        data.each do |d|
+          puts d.to_s
+        end
+        fail 'Multiple candidates'
+      end
       prompt_if_multi ? prompt(data) : data.first
     else
       data

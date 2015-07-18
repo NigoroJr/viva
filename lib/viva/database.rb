@@ -24,6 +24,7 @@ class Viva
     end
 
     # Given a Hash or an Array of Hash, creates a new series in the database.
+    # Returns the newly created Series object
     def add_series(series)
       type_check(series, :series)
       Series.create(series)
@@ -32,6 +33,7 @@ class Viva
     # Given a Hash or an Array of Hash, adds the track(s) to the database.
     # Optional Hash with the series information (raw name, Japanese name, or
     # English name) can be given to relate the track(s) to that series.
+    # When strict is true, given Hash will be searched using strict search.
     def add_tracks(tracks, series = nil)
       type_check(tracks, :track, 'Tracks')
       created = Track.create(tracks)
@@ -40,7 +42,8 @@ class Viva
       return if series.is_a?(Hash) && series.all? { |_k, v| v.nil? }
 
       if series.is_a?(Hash)
-        series = Viva.singularize(search_series(series), unique: true)
+        result = search_series(series)
+        series = Viva.singularize(result, unique: true)
       end
       fail "Associated series is #{series.class}" \
         "when Series instance expected"  unless series.is_a?(Series)
@@ -232,7 +235,7 @@ class Viva
       unless properties.is_a?(Hash) || \
              (properties.is_a?(Array) && properties.first.is_a?(Hash))
         what = name || key.to_s.capitalize
-        fail "#{what} is #{properties.class} neither a Hash nor an Array of Hash"
+        fail "#{what} is #{properties.class} not a Hash or an Array of Hash"
       end
 
       true
